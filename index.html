@@ -1,44 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>.mcstructure Generator</title>
-  <script src="https://cdn.jsdelivr.net/npm/nbt-js@1.1.3/dist/nbt.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>.mcstructure Converter</title>
 </head>
 <body>
-  <h1>Convert JSON to .mcstructure</h1>
+  <h1>Upload JSON and Convert to .mcstructure</h1>
 
-  <input type="file" id="fileInput" accept=".json"><br><br>
-  <button onclick="convert()">Convert & Download</button>
+  <input type="file" id="fileInput" accept=".json" />
+  <button id="convertBtn">Convert & Download</button>
 
-  <script>
-    function convert() {
-      const file = document.getElementById('fileInput').files[0];
+  <script type="module">
+    import * as nbt from "https://esm.sh/@tryashtar/nbt@1.2.4";
+
+    document.getElementById("convertBtn").addEventListener("click", async () => {
+      const file = document.getElementById("fileInput").files[0];
       if (!file) {
-        alert("Please upload a .json file first.");
+        alert("Please upload a .json file.");
         return;
       }
 
       const reader = new FileReader();
-      reader.onload = function (event) {
+      reader.onload = async function (event) {
         try {
           const json = JSON.parse(event.target.result);
-          const buffer = window.NBT.writeUncompressed(json, 'little');
-          const blob = new Blob([buffer], { type: 'application/octet-stream' });
+          const buffer = await nbt.writeUncompressed(json, "little");
 
-          const a = document.createElement('a');
+          const blob = new Blob([buffer], { type: "application/octet-stream" });
+          const a = document.createElement("a");
           a.href = URL.createObjectURL(blob);
-          a.download = file.name.replace(/\.json$/, '.mcstructure');
+          a.download = file.name.replace(/\.json$/, ".mcstructure");
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
         } catch (err) {
-          alert("Failed to convert to .mcstructure:\n" + err.message);
+          console.error(err);
+          alert("Failed to convert: " + err.message);
         }
       };
 
       reader.readAsText(file);
-    }
+    });
   </script>
 </body>
 </html>
